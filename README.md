@@ -1,35 +1,107 @@
 # Career Assistant Platform
 
-Career Assistant Platform is a production-minded backend for organizing a job search. It currently provides a validated, database-backed Job REST API and is developed as a long-term portfolio project: capabilities are implemented, tested, and documented before they are presented as complete.
+Backend-first career tracking and job-analysis platform built with FastAPI, SQLAlchemy, and automated testing.
 
-## Motivation
+## Overview
 
-Job seekers often spread role research, application tracking, and interview notes across disconnected tools. This project is building a clear API foundation for those workflows while demonstrating maintainable backend design, automated verification, and honest delivery evidence.
+Career Assistant Platform turns a pasted job description into an editable preview, then lets the user explicitly save and track that opportunity through a six-state lifecycle. The current release is a focused Phase 2 backend slice with a small, real browser demo—not a mockup of a future product.
 
-## Current Features
+## Why This Project
 
-- FastAPI application with generated OpenAPI 3.1 documentation
-- Versioned Job CRUD API under `/api/v1/jobs`
-- SQLAlchemy 2.0 persistence with an environment-driven database URL
-- Pagination plus exact, case-insensitive company and location filters
-- Status filtering across `saved`, `applied`, `interview`, `offer`, `rejected`, and `closed`
-- Separate Pydantic create, update, read, list, and error contracts
-- Consistent JSON responses for validation errors and missing jobs
-- `GET /health` readiness endpoint
-- 17 isolated pytest integration tests using temporary SQLite databases
-- Architecture, database design, API acceptance, and issue documentation
+Job research and application state often drift across spreadsheets, bookmarks, and notes. This project establishes a reliable data and API foundation while demonstrating practical backend engineering: explicit contracts, persistence, isolated tests, graceful provider fallback, and evidence tied to running code.
 
-## Planned Features
+## Features
 
-The following capabilities are **planned / coming soon** and are not implemented yet:
+### Implemented
 
+- Job create, list, get, patch, and delete REST operations
+- SQLAlchemy 2.x persistence and environment-driven database configuration
+- Six states: `saved`, `applied`, `interview`, `offer`, `rejected`, `closed`
+- Pagination and company, status, and location filters
+- Pydantic validation for blank fields, URLs, statuses, and query bounds
+- Consistent `404` and `422` error envelopes
+- Idempotent seed command with 10 fictional Jobs
+- Lightweight `/demo` tracker using the existing API
+- Preview-only JD extraction with editable fields and detected skills
+- Always-available rule-based extraction
+- Optional DeepSeek provider with classified failures and truthful rule fallback
+- Explicit mock provider for tests/development
+- 40 isolated automated tests
+
+### Planned
+
+- MySQL runtime verification and an intentional production database setup
+- Alembic migrations when the schema begins evolving
 - Application and interview workflow entities
-- Alembic-managed schema migrations
-- Verified MySQL development/deployment integration
-- AI-assisted job description analysis
-- Retrieval-augmented generation (RAG)
-- Tool calling and workflow automation
-- Deployment and observability configuration
+- Authentication, deployment, and observability
+
+No RAG, agent, MCP, vector database, or automated application submission is implemented.
+
+## Demo
+
+Run the server and open [http://127.0.0.1:8000/demo](http://127.0.0.1:8000/demo). The page loads the live development database, filters Jobs, extracts a pasted JD, and saves only after confirmation.
+
+![Career Assistant Platform demo dashboard](docs/images/demo-dashboard.png)
+
+## API
+
+Swagger UI is available at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/health` | Readiness check |
+| `POST` | `/api/v1/jobs` | Create a Job |
+| `GET` | `/api/v1/jobs` | List, paginate, and filter Jobs |
+| `GET` | `/api/v1/jobs/{job_id}` | Get one Job |
+| `PATCH` | `/api/v1/jobs/{job_id}` | Update supplied fields |
+| `DELETE` | `/api/v1/jobs/{job_id}` | Delete a Job |
+| `POST` | `/api/v1/job-extract` | Produce an extraction preview without saving |
+
+![Swagger UI showing Job CRUD and extraction](docs/images/swagger-job-api.png)
+
+## Job Extraction
+
+The default `auto` configuration uses DeepSeek only when `DEEPSEEK_API_KEY` is deliberately configured; otherwise it uses the deterministic rule-based provider. The mock provider is limited to test/development and always identifies itself as `mock`.
+
+If a configured DeepSeek request fails, the response is labeled `rule_based_fallback` and includes a safe reason code. It is never presented as model success. DeepSeek was **not real-call verified** in this phase because no API key was present. HTTP success, `401`, `429`, `5xx`, timeout, and malformed-response behavior are tested with mock transports.
+
+![Rule-based job extraction preview](docs/images/job-extraction-demo.png)
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/job-extract \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Company: Example Tech\nRole: Python Backend Intern\nLocation: Beijing\nRequirements: Python, FastAPI, SQL"}'
+```
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Client[Demo / Swagger / API Client] --> FastAPI
+    FastAPI --> JobRouter[Job Router]
+    JobRouter --> JobService --> ORM[SQLAlchemy 2] --> DevDB[(Development SQLite)]
+    FastAPI --> ExtractRouter[Extraction Router]
+    ExtractRouter --> ExtractService[Extraction Service]
+    ExtractService --> Rule[Rule-based]
+    ExtractService -. optional .-> DeepSeek
+    ExtractService -. test/dev .-> Mock
+    ExtractService --> Preview[Editable Preview]
+    Preview -->|explicit save| JobRouter
+    Tests[pytest + HTTPX] --> FastAPI
+    Tests --> TestDB[(Temporary SQLite per test)]
+```
+
+See [Current Architecture](docs/architecture/current-architecture.md) for boundaries and request flows.
+
+## Data Model
+
+Only the real `jobs` table is modeled. `title` and `company` are required; optional description, location, and validated source URL fields keep the MVP useful without adding unrelated entities.
+
+![Current Job schema](docs/images/database-er-diagram.png)
+
+See [Database Schema](docs/architecture/database-schema.md) for fields, constraints, enum decisions, and verified SQLite DDL.
 
 ## Tech Stack
 
@@ -37,150 +109,117 @@ The following capabilities are **planned / coming soon** and are not implemented
 - FastAPI and Uvicorn
 - SQLAlchemy 2.x
 - Pydantic 2 and pydantic-settings
-- SQLite for the currently verified local development flow
-- pytest, HTTPX, and AnyIO for isolated API integration tests
+- SQLite for verified local development
+- pytest, HTTPX, and AnyIO for integration tests
+- Plain HTML, CSS, and JavaScript for the demo
 
-MySQL was not available on the Phase 2 development machine and has **not** been verified. The application reads `DATABASE_URL` from the environment and is configuration-ready for another SQLAlchemy database URL once the appropriate driver and database environment are deliberately added.
+MySQL was unavailable on the Phase 2 machine and has not been verified. `DATABASE_URL` provides a clean future switch point, but “configuration-ready” is not a claim of working MySQL integration.
 
-## Project Structure
-
-```text
-career-assistant-platform/
-├── app/
-│   ├── api/          # Health and Job HTTP routes
-│   ├── core/         # Settings, database lifecycle, and error handling
-│   ├── models/       # SQLAlchemy ORM models
-│   ├── schemas/      # Pydantic API contracts
-│   ├── services/     # Job business operations
-│   └── main.py       # FastAPI composition and lifespan
-├── docs/
-│   ├── architecture/ # Current architecture and database schema
-│   ├── development/  # Setup, phase logs, decisions, issues, acceptance
-│   └── images/       # Evidence captured from the running project
-├── scripts/
-├── tests/            # Isolated SQLite integration tests
-├── .env.example
-├── .gitignore
-├── LICENSE
-└── requirements.txt
-```
-
-## Getting Started
-
-1. Clone the repository and enter it:
-
-   ```bash
-   git clone https://github.com/xuyang2005cs/career-assistant-platform.git
-   cd career-assistant-platform
-   ```
-
-2. Create and activate a virtual environment:
-
-   ```bash
-   python -m venv .venv
-   ```
-
-   On Windows PowerShell:
-
-   ```powershell
-   .\.venv\Scripts\Activate.ps1
-   ```
-
-   On macOS or Linux:
-
-   ```bash
-   source .venv/bin/activate
-   ```
-
-3. Install dependencies:
-
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
-
-4. Optionally create local settings and keep them uncommitted:
-
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-
-   Without a local `.env`, the safe default is `sqlite:///./career_assistant.db`.
-
-5. Start the API:
-
-   ```bash
-   python -m uvicorn app.main:app --reload
-   ```
-
-6. Open `http://127.0.0.1:8000/docs` for Swagger UI. Health is available at `http://127.0.0.1:8000/health`.
-
-## API Overview
-
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/api/v1/jobs` | Create a job |
-| `GET` | `/api/v1/jobs` | List, paginate, and filter jobs |
-| `GET` | `/api/v1/jobs/{job_id}` | Get one job |
-| `PATCH` | `/api/v1/jobs/{job_id}` | Partially update a job |
-| `DELETE` | `/api/v1/jobs/{job_id}` | Delete a job |
-
-List query parameters are `page`, `page_size` (maximum 100), `company`, `status`, and `location`.
-
-## Running Tests
+## Testing
 
 ```bash
 python -m pytest -v
 ```
 
-The current suite contains 17 tests. Every case receives a fresh temporary SQLite file through a FastAPI dependency override; tests never use the local development database.
+The suite contains 40 tests. Each API case receives a fresh temporary SQLite file through a FastAPI dependency override; tests never access the development database. DeepSeek tests use HTTPX mock transports and make no external request.
 
-## Architecture
+![Verified pytest result: 40 passed](docs/images/pytest-result.png)
 
-```mermaid
-flowchart LR
-    Client[API Client] --> FastAPI[FastAPI Application]
-    FastAPI --> Router[Health and Job Routers]
-    Router --> Service[Job Service]
-    Service --> ORM[SQLAlchemy 2 ORM]
-    ORM --> DevDB[(Development SQLite)]
-    Tests[pytest + HTTPX] --> FastAPI
-    Tests --> TestDB[(Isolated Test SQLite)]
+## Getting Started
+
+```bash
+git clone https://github.com/xuyang2005cs/career-assistant-platform.git
+cd career-assistant-platform
+python -m venv .venv
 ```
 
-See [Current Architecture](docs/architecture/current-architecture.md) and [Database Schema](docs/architecture/database-schema.md) for the implemented boundaries and constraints.
+Activate the environment on Windows PowerShell and install dependencies:
 
-## Screenshots
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env  # optional; .env is ignored
+```
 
-All screenshots below were captured from the running Phase 2 application using synthetic data.
+Create the SQLite schema, load safe demo data, and start the application:
 
-### Swagger Job API
+```powershell
+python -m scripts.seed_demo_data
+python -m uvicorn app.main:app --reload
+```
 
-![Swagger UI showing the Job CRUD endpoints](docs/images/swagger-job-api.png)
+The seed command is idempotent on title + company. All bundled records and screenshots use fictional data.
 
-### Job API Example
+## API Examples
 
-![Swagger execution showing a real 201 Job response](docs/images/job-api-example.png)
+List the second page of saved roles in Beijing:
 
-### Database Schema
+```text
+GET /api/v1/jobs?page=2&page_size=5&status=saved&location=Beijing
+```
 
-![Current Job database schema](docs/images/database-er-diagram.png)
+Create a confirmed preview as a Job:
 
-## Database Status
+```json
+{
+  "title": "Python Backend Intern",
+  "company": "Example Tech",
+  "location": "Beijing",
+  "description": "Synthetic portfolio sample.",
+  "source_url": "https://example.com/jobs/python-backend-intern",
+  "status": "saved"
+}
+```
 
-- Local development: SQLite, verified with real CRUD and filter requests
-- Automated tests: a separate temporary SQLite database per test, verified
-- MySQL: not available on the Phase 2 machine and not verified
-- Schema lifecycle: `Base.metadata.create_all()` for the current single-table MVP; Alembic is planned when migrations become necessary
+![Real Swagger create response](docs/images/job-api-example.png)
+
+## Project Structure
+
+```text
+app/
+├── api/                 # health, Job, extraction, and demo routes
+├── core/                # settings, database lifecycle, error handling
+├── models/              # SQLAlchemy Job model
+├── schemas/             # API contracts
+├── services/
+│   ├── extraction/      # rule-based, DeepSeek, mock, orchestration
+│   └── job_service.py
+├── static/              # framework-light demo
+└── main.py
+docs/
+├── architecture/
+├── development/
+├── images/
+└── research/
+scripts/                 # idempotent seed and evidence renderer
+tests/                   # isolated integration and provider tests
+```
+
+## Engineering Decisions
+
+- One entity first: a complete Job vertical slice is easier to explain and verify than several incomplete domains.
+- Explicit schemas: ORM objects are not request contracts.
+- Preview before persistence: extraction never silently writes a Job.
+- Offline baseline: the product remains useful without an API key.
+- Honest provider metadata: `rule_based`, `rule_based_fallback`, `deepseek`, and `mock` are distinguishable.
+- Simple schema lifecycle: `create_all()` is sufficient until real migrations exist.
+
+## Development Notes
+
+- [Phase 2 Completion Log](docs/development/phase-02-completion.md)
+- [API Acceptance Evidence](docs/development/api-acceptance-phase-02.md)
+- [Issue Log](docs/development/issue-log.md)
+- [Open-source Reference Review](docs/research/open-source-reference.md)
 
 ## Roadmap
 
-- [x] Phase 1: repository foundation, health endpoint, tests, and documentation
-- [x] Phase 2: Job CRUD, SQLAlchemy persistence, filtering, validation, evidence, and isolated tests
-- [ ] Phase 3: expand the application workflow and introduce intentional migration/deployment design
-- [ ] Phase 4: add AI job analysis with measurable evaluation
-- [ ] Phase 5: expand automation, observability, and deployment readiness
+- [x] Phase 1: repository foundation and health endpoint
+- [x] Phase 2: Job CRUD, persistence, isolated tests, demo, and extraction preview
+- [ ] Phase 3: define the next domain deliberately; add migrations when required
+- [ ] Verify MySQL in a controlled environment
+- [ ] Verify optional DeepSeek with a user-provided key and synthetic input
 
-Roadmap items are plans, not claims of completed functionality.
+Roadmap items are plans, not claims of completed behavior.
 
 ## License
 
