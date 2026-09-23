@@ -10,6 +10,8 @@ All records below are synthetic. Uvicorn served the real application on `http://
 |---|---|
 | `GET /health` | `200`, `{"status":"ok"}` |
 | `GET /docs` | `200` |
+| `GET /demo` | `200`, live dashboard loaded 10 synthetic Jobs |
+| `POST /api/v1/job-extract` | `200`, rule-based preview with five detected skills |
 | `POST /api/v1/jobs` | `201`, created Job 1 |
 | `GET /api/v1/jobs/1` | `200`, returned Job 1 |
 | Filter by company + status + location | `200`, total 1 |
@@ -41,7 +43,7 @@ The matching live Swagger response is captured in [`job-api-example.png`](../ima
 
 The generated document exposed:
 
-- Paths: `/health`, `/api/v1/jobs`, `/api/v1/jobs/{job_id}`
-- Operations: create, list, get, update, and delete
-- Schemas: `JobCreate`, `JobUpdate`, `JobRead`, `JobList`, `JobStatus`, `ErrorDetail`, `ErrorResponse`, and `HealthResponse`
+- Paths: `/health`, `/api/v1/jobs`, `/api/v1/jobs/{job_id}`, and `/api/v1/job-extract`
+- Operations: create, list, get, update, delete, and extraction preview
+- Schemas: Job CRUD/list/status contracts, extraction request/preview contracts, shared errors, and health
 - Explicit `201`, `204`, `404`, and custom `422` response documentation

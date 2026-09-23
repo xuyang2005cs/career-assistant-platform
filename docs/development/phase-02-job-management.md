@@ -50,13 +50,13 @@ Six statuses were selected: `saved`, `applied`, `interview`, `offer`, `rejected`
 
 The suite exercises the ASGI application through HTTPX. A fixture creates a new SQLite file and SQLAlchemy engine for every test, overrides `get_db`, and disposes the engine afterward. This prevents ordering dependencies and protects the development database.
 
-Phase 2 result: 17 tests passed, including all required CRUD, validation, pagination, filtering, and missing-resource cases.
+The initial Job API milestone passed 17 tests. The completed Phase 2 suite now passes 40 tests covering CRUD, validation, pagination, filtering, demo assets, idempotent seeding, extraction providers, and truthful fallback behavior.
 
 ## Manual Acceptance
 
 Uvicorn was started at `127.0.0.1:8000`. Real requests verified `/health`, `/docs`, create, get, combined filters, patch, delete, and missing-resource behavior. Swagger “Try it out” created a second synthetic Job and returned HTTP `201`.
 
-See [API Acceptance Evidence](api-acceptance-phase-02.md) and the images in [`docs/images`](../images/README.md).
+The completed acceptance also verified `/demo` and `/api/v1/job-extract`. See [API Acceptance Evidence](api-acceptance-phase-02.md), the [completion log](phase-02-completion.md), and the images in [`docs/images`](../images/README.md).
 
 ## Deferred Work
 
@@ -64,4 +64,5 @@ See [API Acceptance Evidence](api-acceptance-phase-02.md) and the images in [`do
 - Alembic migrations
 - Entities other than Job
 - Authentication and authorization
-- AI, RAG, agents, MCP, and vector storage
+- Real DeepSeek smoke verification (no key was configured)
+- RAG, agents, MCP, and vector storage

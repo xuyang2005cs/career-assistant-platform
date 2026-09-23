@@ -37,3 +37,17 @@
 **Cause:** The browser automation safety policy blocks the `file:` protocol.
 
 **Resolution:** Served the static diagram temporarily on `127.0.0.1:8765`, captured the verified page, and stopped the temporary server. No schema data was uploaded externally.
+
+## 2026-09-24: Demo acceptance produced a browser console error
+
+**Observed:** The demo rendered and functioned, but the browser console reported a `404` for `/favicon.ico`.
+
+**Cause:** Browsers request a favicon automatically even when a page does not declare one.
+
+**Resolution:** Added a safe inline `data:` favicon to the demo and the reproducible test-evidence page, reran browser acceptance, and confirmed zero console errors and warnings.
+
+## 2026-09-24: Test screenshot risked becoming manually curated evidence
+
+**Observed:** A terminal screenshot would be difficult to reproduce at a stable size and could be mistaken for manually composed output.
+
+**Resolution:** Ran pytest with JUnit XML output, added a small renderer that reads the real counts and duration, and captured that generated page in a real browser. The source XML remains a local ignored build artifact; the screenshot reports the verified 40-test run.
