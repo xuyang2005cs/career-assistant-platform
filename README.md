@@ -1,57 +1,64 @@
 # Career Assistant Platform
 
-Career Assistant Platform is a backend foundation for a practical, extensible job-search assistant. The project is being developed as a production-minded portfolio project: each capability will be implemented, tested, and documented before it is presented as complete.
+Career Assistant Platform is a production-minded backend for organizing a job search. It currently provides a validated, database-backed Job REST API and is developed as a long-term portfolio project: capabilities are implemented, tested, and documented before they are presented as complete.
 
 ## Motivation
 
-Job seekers often spread role research, application tracking, document preparation, and interview notes across disconnected tools. This project aims to bring those workflows together behind a clear API while demonstrating maintainable backend engineering and honest, verifiable delivery.
+Job seekers often spread role research, application tracking, and interview notes across disconnected tools. This project is building a clear API foundation for those workflows while demonstrating maintainable backend design, automated verification, and honest delivery evidence.
 
 ## Current Features
 
-- FastAPI application with generated OpenAPI documentation
+- FastAPI application with generated OpenAPI 3.1 documentation
+- Versioned Job CRUD API under `/api/v1/jobs`
+- SQLAlchemy 2.0 persistence with an environment-driven database URL
+- Pagination plus exact, case-insensitive company and location filters
+- Status filtering across `saved`, `applied`, `interview`, `offer`, `rejected`, and `closed`
+- Separate Pydantic create, update, read, list, and error contracts
+- Consistent JSON responses for validation errors and missing jobs
 - `GET /health` readiness endpoint
-- Automated API test using pytest and HTTPX ASGI transport
-- Environment template and repository security defaults
-- Architecture and development decision records
+- 17 isolated pytest integration tests using temporary SQLite databases
+- Architecture, database design, API acceptance, and issue documentation
 
 ## Planned Features
 
 The following capabilities are **planned / coming soon** and are not implemented yet:
 
-- Job and application management
-- SQLAlchemy persistence with MySQL
+- Application and interview workflow entities
+- Alembic-managed schema migrations
+- Verified MySQL development/deployment integration
 - AI-assisted job description analysis
 - Retrieval-augmented generation (RAG)
 - Tool calling and workflow automation
-- Expanded unit, integration, and end-to-end test coverage
+- Deployment and observability configuration
 
 ## Tech Stack
 
 - Python 3.13
-- FastAPI
-- Uvicorn
-- pytest
-- HTTPX
+- FastAPI and Uvicorn
+- SQLAlchemy 2.x
+- Pydantic 2 and pydantic-settings
+- SQLite for the currently verified local development flow
+- pytest, HTTPX, and AnyIO for isolated API integration tests
 
-SQLAlchemy, MySQL, and AI-related components are planned for later phases.
+MySQL was not available on the Phase 2 development machine and has **not** been verified. The application reads `DATABASE_URL` from the environment and is configuration-ready for another SQLAlchemy database URL once the appropriate driver and database environment are deliberately added.
 
 ## Project Structure
 
 ```text
 career-assistant-platform/
 ├── app/
-│   ├── api/          # HTTP endpoints
-│   ├── core/         # Shared configuration and utilities
-│   ├── models/       # Planned domain and persistence models
-│   ├── schemas/      # Planned request and response schemas
-│   ├── services/     # Planned application services
-│   └── main.py       # FastAPI application entry point
+│   ├── api/          # Health and Job HTTP routes
+│   ├── core/         # Settings, database lifecycle, and error handling
+│   ├── models/       # SQLAlchemy ORM models
+│   ├── schemas/      # Pydantic API contracts
+│   ├── services/     # Job business operations
+│   └── main.py       # FastAPI composition and lifespan
 ├── docs/
-│   ├── architecture/
-│   ├── development/
-│   └── images/
+│   ├── architecture/ # Current architecture and database schema
+│   ├── development/  # Setup, phase logs, decisions, issues, acceptance
+│   └── images/       # Evidence captured from the running project
 ├── scripts/
-├── tests/
+├── tests/            # Isolated SQLite integration tests
 ├── .env.example
 ├── .gitignore
 ├── LICENSE
@@ -91,13 +98,33 @@ career-assistant-platform/
    python -m pip install -r requirements.txt
    ```
 
-4. Start the API:
+4. Optionally create local settings and keep them uncommitted:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+   Without a local `.env`, the safe default is `sqlite:///./career_assistant.db`.
+
+5. Start the API:
 
    ```bash
    python -m uvicorn app.main:app --reload
    ```
 
-5. Open `http://127.0.0.1:8000/docs` for Swagger UI or request `http://127.0.0.1:8000/health`.
+6. Open `http://127.0.0.1:8000/docs` for Swagger UI. Health is available at `http://127.0.0.1:8000/health`.
+
+## API Overview
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/api/v1/jobs` | Create a job |
+| `GET` | `/api/v1/jobs` | List, paginate, and filter jobs |
+| `GET` | `/api/v1/jobs/{job_id}` | Get one job |
+| `PATCH` | `/api/v1/jobs/{job_id}` | Partially update a job |
+| `DELETE` | `/api/v1/jobs/{job_id}` | Delete a job |
+
+List query parameters are `page`, `page_size` (maximum 100), `company`, `status`, and `location`.
 
 ## Running Tests
 
@@ -105,31 +132,51 @@ career-assistant-platform/
 python -m pytest -v
 ```
 
-The current test suite verifies the status code and JSON contract of the health endpoint.
+The current suite contains 17 tests. Every case receives a fresh temporary SQLite file through a FastAPI dependency override; tests never use the local development database.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     Client[API Client] --> FastAPI[FastAPI Application]
-    FastAPI --> Health[Health Router]
-    Health --> Response[JSON: status ok]
+    FastAPI --> Router[Health and Job Routers]
+    Router --> Service[Job Service]
+    Service --> ORM[SQLAlchemy 2 ORM]
+    ORM --> DevDB[(Development SQLite)]
     Tests[pytest + HTTPX] --> FastAPI
+    Tests --> TestDB[(Isolated Test SQLite)]
 ```
 
-The current design intentionally contains only the components needed by the running application. See [Current Architecture](docs/architecture/current-architecture.md) for boundaries and future integration points.
+See [Current Architecture](docs/architecture/current-architecture.md) and [Database Schema](docs/architecture/database-schema.md) for the implemented boundaries and constraints.
 
 ## Screenshots
 
-Verified screenshots will be stored in [`docs/images`](docs/images/README.md) as features are implemented. No placeholder or fabricated product screenshots are included.
+All screenshots below were captured from the running Phase 2 application using synthetic data.
 
-Planned evidence includes Swagger UI, pytest output, the application workflow, the database ER diagram, test reporting, and AI evaluation results.
+### Swagger Job API
+
+![Swagger UI showing the Job CRUD endpoints](docs/images/swagger-job-api.png)
+
+### Job API Example
+
+![Swagger execution showing a real 201 Job response](docs/images/job-api-example.png)
+
+### Database Schema
+
+![Current Job database schema](docs/images/database-er-diagram.png)
+
+## Database Status
+
+- Local development: SQLite, verified with real CRUD and filter requests
+- Automated tests: a separate temporary SQLite database per test, verified
+- MySQL: not available on the Phase 2 machine and not verified
+- Schema lifecycle: `Base.metadata.create_all()` for the current single-table MVP; Alembic is planned when migrations become necessary
 
 ## Roadmap
 
 - [x] Phase 1: repository foundation, health endpoint, tests, and documentation
-- [ ] Phase 2: define the job/application domain and persistence design
-- [ ] Phase 3: implement database-backed workflows
+- [x] Phase 2: Job CRUD, SQLAlchemy persistence, filtering, validation, evidence, and isolated tests
+- [ ] Phase 3: expand the application workflow and introduce intentional migration/deployment design
 - [ ] Phase 4: add AI job analysis with measurable evaluation
 - [ ] Phase 5: expand automation, observability, and deployment readiness
 

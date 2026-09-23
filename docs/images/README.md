@@ -1,15 +1,17 @@
 # Project Images
 
-This directory contains only evidence captured from implemented and running features. Images must not imply functionality that does not exist.
+This directory contains evidence captured from implemented and running features. Images must not imply functionality that does not exist.
 
-Planned filenames:
+## Current Evidence
 
-- `architecture-overview.png`
-- `database-er-diagram.png`
-- `swagger-api.png`
-- `pytest-result.png`
+- `swagger-job-api.png`: live FastAPI Swagger UI showing Health and all five Job CRUD operations plus generated schemas
+- `job-api-example.png`: live Swagger execution of a synthetic Job creation request with HTTP 201 response
+- `database-er-diagram.png`: one-entity schema diagram based on the actual Phase 2 SQLite `jobs` DDL
+
+## Planned Evidence
+
+The following files do not exist yet and will be added only when their corresponding features are real:
+
 - `application-demo.png`
 - `allure-report.png`
 - `ai-evaluation.png`
-
-Files will be added only when the corresponding artifact can be generated from the real project.

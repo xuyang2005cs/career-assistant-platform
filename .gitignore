@@ -38,3 +38,7 @@ tmp/
 temp/
 *.tmp
 *.bak
+
+# Local browser automation artifacts
+.playwright-cli/
+output/
