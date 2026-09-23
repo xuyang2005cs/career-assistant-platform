@@ -1,14 +1,24 @@
 """Tests for the health-check endpoint."""
 
-from fastapi.testclient import TestClient
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from app.main import app
 
-client = TestClient(app)
+
+@pytest.fixture
+def anyio_backend() -> str:
+    """Run async tests with the standard-library event loop."""
+
+    return "asyncio"
 
 
-def test_health_check() -> None:
-    response = client.get("/health")
+@pytest.mark.anyio
+async def test_health_check() -> None:
+    transport = ASGITransport(app=app)
+
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/health")
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
