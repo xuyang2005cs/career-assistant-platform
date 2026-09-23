@@ -50,8 +50,24 @@ async def test_create_job_rejects_blank_title(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
+async def test_create_job_rejects_blank_company(client: AsyncClient) -> None:
+    response = await create_job(client, company="   ")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.anyio
 async def test_create_job_rejects_invalid_url(client: AsyncClient) -> None:
     response = await create_job(client, source_url="not-a-url")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.anyio
+async def test_create_job_rejects_invalid_status(client: AsyncClient) -> None:
+    response = await create_job(client, status="considering")
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "validation_error"
@@ -89,10 +105,31 @@ async def test_list_jobs_paginates(client: AsyncClient) -> None:
 
 @pytest.mark.anyio
 async def test_list_jobs_rejects_invalid_pagination(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/jobs", params={"page": 0, "page_size": 101})
+    response = await client.get("/api/v1/jobs", params={"page": 0})
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.anyio
+async def test_list_jobs_rejects_page_size_over_maximum(client: AsyncClient) -> None:
+    response = await client.get("/api/v1/jobs", params={"page_size": 101})
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.anyio
+async def test_list_jobs_returns_empty_page_beyond_results(client: AsyncClient) -> None:
+    await create_job(client)
+
+    response = await client.get("/api/v1/jobs", params={"page": 2, "page_size": 20})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 1
+    assert body["page"] == 2
+    assert body["items"] == []
 
 
 @pytest.mark.anyio
@@ -172,6 +209,29 @@ async def test_update_job(client: AsyncClient) -> None:
     body = response.json()
     assert body["status"] == "interview"
     assert body["location"] == "Shanghai"
+
+
+@pytest.mark.anyio
+async def test_update_job_details(client: AsyncClient) -> None:
+    created = await create_job(client)
+    job_id = created.json()["id"]
+
+    response = await client.patch(
+        f"/api/v1/jobs/{job_id}",
+        json={
+            "title": "Backend Engineer",
+            "company": "Nova Systems",
+            "description": "Maintain production API services.",
+            "source_url": "https://example.com/jobs/backend-engineer",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "Backend Engineer"
+    assert body["company"] == "Nova Systems"
+    assert body["description"] == "Maintain production API services."
+    assert body["source_url"] == "https://example.com/jobs/backend-engineer"
 
 
 @pytest.mark.anyio
