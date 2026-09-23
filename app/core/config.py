@@ -1,7 +1,9 @@
 """Application settings loaded from environment variables."""
 
 from functools import lru_cache
+from typing import Literal
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +15,11 @@ class Settings(BaseSettings):
     app_host: str = "127.0.0.1"
     app_port: int = 8000
     database_url: str = "sqlite:///./career_assistant.db"
+    extraction_provider: Literal["auto", "rule_based", "deepseek", "mock"] = "auto"
+    deepseek_api_key: SecretStr | None = None
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-flash"
+    deepseek_timeout_seconds: float = 10.0
 
     model_config = SettingsConfigDict(
         env_file=".env",

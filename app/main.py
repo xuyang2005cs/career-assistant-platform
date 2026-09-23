@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.extraction import router as extraction_router
 from app.api.health import router as health_router
 from app.api.jobs import router as jobs_router
 from app.core.config import get_settings
@@ -33,3 +34,4 @@ app = FastAPI(
 register_exception_handlers(app)
 app.include_router(health_router)
 app.include_router(jobs_router)
+app.include_router(extraction_router)
