@@ -2,9 +2,12 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
+from app.api.demo import router as demo_router
 from app.api.extraction import router as extraction_router
 from app.api.health import router as health_router
 from app.api.jobs import router as jobs_router
@@ -23,6 +26,7 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
 
 
 settings = get_settings()
+static_directory = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(
     title=settings.app_name,
@@ -32,6 +36,8 @@ app = FastAPI(
 )
 
 register_exception_handlers(app)
+app.mount("/static", StaticFiles(directory=static_directory), name="static")
 app.include_router(health_router)
 app.include_router(jobs_router)
 app.include_router(extraction_router)
+app.include_router(demo_router)

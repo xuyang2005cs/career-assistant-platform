@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Career Assistant Platform job tracker and job-description extraction demo.">
+  <title>Career Assistant Platform · Demo</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/demo.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="/demo" aria-label="Career Assistant Platform home">
+      <span class="brand-mark" aria-hidden="true">CA</span>
+      <span>
+        <strong>Career Assistant Platform</strong>
+        <small>Job tracking, without the spreadsheet drift.</small>
+      </span>
+    </a>
+    <nav aria-label="Project links">
+      <a href="/docs">API docs</a>
+      <a href="https://github.com/xuyang2005cs/career-assistant-platform">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="intro" aria-labelledby="intro-title">
+      <div>
+        <p class="eyebrow">Backend-first career workspace</p>
+        <h1 id="intro-title">Turn a job description into a trackable next step.</h1>
+      </div>
+      <p class="intro-copy">Paste a synthetic JD, review the extracted fields, then save it through the same validated API used by the tracker.</p>
+    </section>
+
+    <section class="metrics" aria-label="Job statistics">
+      <article><span>Total jobs</span><strong id="metric-total">—</strong></article>
+      <article><span>Saved</span><strong id="metric-saved">—</strong></article>
+      <article><span>Applied</span><strong id="metric-applied">—</strong></article>
+      <article><span>Interview</span><strong id="metric-interview">—</strong></article>
+      <article><span>Offer</span><strong id="metric-offer">—</strong></article>
+    </section>
+
+    <div class="workspace-grid">
+      <section class="panel tracker-panel" aria-labelledby="tracker-title">
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">Live SQLite data</p>
+            <h2 id="tracker-title">Job tracker</h2>
+          </div>
+          <button class="button button-quiet" id="refresh-jobs" type="button">Refresh</button>
+        </div>
+
+        <div class="filters" role="search">
+          <label>
+            <span>Status</span>
+            <select id="status-filter">
+              <option value="">All statuses</option>
+              <option value="saved">Saved</option>
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+              <option value="closed">Closed</option>
+            </select>
+          </label>
+          <label class="keyword-filter">
+            <span>Company or location</span>
+            <input id="keyword-filter" type="search" placeholder="Try Nova or Remote">
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Role</th><th>Company</th><th>Location</th><th>Status</th></tr>
+            </thead>
+            <tbody id="jobs-body">
+              <tr><td colspan="4" class="table-message">Loading jobs…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="result-count" id="result-count" aria-live="polite"></p>
+      </section>
+
+      <section class="panel extraction-panel" aria-labelledby="extract-title">
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">Preview before persistence</p>
+            <h2 id="extract-title">Extract a job</h2>
+          </div>
+          <span class="offline-badge">Works offline</span>
+        </div>
+
+        <ol class="workflow" aria-label="Extraction workflow">
+          <li class="active"><span>1</span>Paste</li>
+          <li><span>2</span>Extract</li>
+          <li><span>3</span>Review</li>
+          <li><span>4</span>Save</li>
+        </ol>
+
+        <label class="textarea-label" for="jd-text">Job description</label>
+        <textarea id="jd-text" rows="10" placeholder="Company: Example Tech&#10;Role: Python Backend Intern&#10;Location: Beijing&#10;&#10;Requirements: Python, FastAPI, SQL, Git, Linux"></textarea>
+        <div class="action-row">
+          <button class="button button-quiet" id="use-sample" type="button">Use sample JD</button>
+          <button class="button button-primary" id="extract-job" type="button">Extract job</button>
+        </div>
+
+        <section class="preview" id="preview" aria-labelledby="preview-title" hidden>
+          <div class="preview-heading">
+            <div>
+              <p class="section-label">Editable preview</p>
+              <h3 id="preview-title">Confirm the extracted fields</h3>
+            </div>
+            <span class="method-badge" id="extraction-method">—</span>
+          </div>
+          <div class="preview-grid">
+            <label><span>Title</span><input id="preview-title-input" type="text" maxlength="200"></label>
+            <label><span>Company</span><input id="preview-company" type="text" maxlength="200"></label>
+            <label class="full"><span>Location</span><input id="preview-location" type="text" maxlength="200"></label>
+          </div>
+          <div class="skill-block">
+            <span>Detected skills</span>
+            <div class="skill-list" id="skill-list"></div>
+          </div>
+          <p class="fallback-note" id="fallback-note" hidden></p>
+          <button class="button button-save" id="save-job" type="button">Save to job tracker</button>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <footer>FastAPI · SQLAlchemy 2 · SQLite · automated pytest coverage</footer>
+  <script src="/static/demo.js" defer></script>
+</body>
+</html>
