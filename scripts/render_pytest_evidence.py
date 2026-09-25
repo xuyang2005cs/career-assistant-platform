@@ -43,45 +43,45 @@ def render(report_path: Path, output_path: Path) -> None:
         for name, count in modules
     )
     html = f"""<!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Career Assistant Platform — Test Evidence</title>
+  <title>Career Assistant Platform — 自动化测试结果</title>
   <style>
     :root {{ color-scheme: dark; --ink:#07111f; --panel:#0d1b2e; --line:#284260; --green:#64e6a7; --muted:#9bb0c7; }}
     * {{ box-sizing:border-box; }}
-    body {{ margin:0; min-height:100vh; background:var(--ink); color:#f5f8fb; font-family:"Segoe UI",sans-serif; }}
+    body {{ margin:0; min-height:100vh; background:var(--ink); color:#f5f8fb; font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",sans-serif; }}
     main {{ width:min(1180px,calc(100% - 72px)); margin:0 auto; padding:64px 0; }}
     .eyebrow {{ color:var(--green); font:600 13px/1.2 Consolas,monospace; letter-spacing:.16em; text-transform:uppercase; }}
-    h1 {{ margin:16px 0 10px; font:700 48px/1.05 Bahnschrift,"Segoe UI",sans-serif; }}
+    h1 {{ margin:16px 0 10px; font:700 48px/1.15 Bahnschrift,"Microsoft YaHei UI","Segoe UI",sans-serif; }}
     .sub {{ color:var(--muted); font-size:18px; }}
     .hero {{ margin:48px 0 32px; display:grid; grid-template-columns:2fr repeat(3,1fr); gap:16px; }}
     .card {{ min-height:152px; padding:24px; border:1px solid var(--line); background:var(--panel); }}
     .card.primary {{ border-top:4px solid var(--green); }}
     .label {{ color:var(--muted); font:600 12px/1.2 Consolas,monospace; letter-spacing:.12em; text-transform:uppercase; }}
-    .value {{ margin-top:18px; font:700 50px/1 Bahnschrift,"Segoe UI",sans-serif; }}
+    .value {{ margin-top:18px; font:700 45px/1.1 Bahnschrift,"Microsoft YaHei UI","Segoe UI",sans-serif; }}
     .value.green {{ color:var(--green); }}
     .modules {{ border:1px solid var(--line); background:var(--panel); padding:28px; }}
-    .modules h2 {{ margin:0 0 22px; font:600 22px Bahnschrift,"Segoe UI",sans-serif; }}
+    .modules h2 {{ margin:0 0 22px; font:600 22px Bahnschrift,"Microsoft YaHei UI","Segoe UI",sans-serif; }}
     .module {{ display:flex; justify-content:space-between; padding:13px 0; border-top:1px solid #1d334d; font-family:Consolas,monospace; }}
     .module span {{ color:#c8d5e3; }}
     footer {{ display:flex; justify-content:space-between; gap:24px; margin-top:26px; color:var(--muted); font:13px Consolas,monospace; }}
   </style>
 </head>
 <body><main>
-  <div class="eyebrow">Verified build evidence</div>
-  <h1>Automated API test suite</h1>
-  <div class="sub">Career Assistant Platform · pytest · isolated temporary SQLite databases</div>
+  <div class="eyebrow">项目质量验证</div>
+  <h1>自动化测试结果</h1>
+  <div class="sub">Career Assistant Platform · pytest · 每项测试使用独立 SQLite 数据库</div>
   <section class="hero">
-    <div class="card primary"><div class="label">Result</div><div class="value green">{passed} passed</div></div>
-    <div class="card"><div class="label">Failed</div><div class="value">{int(totals['failures'])}</div></div>
-    <div class="card"><div class="label">Errors</div><div class="value">{int(totals['errors'])}</div></div>
-    <div class="card"><div class="label">Duration</div><div class="value">{float(totals['time']):.2f}s</div></div>
+    <div class="card primary"><div class="label">测试结果</div><div class="value green">{passed} 项通过</div></div>
+    <div class="card"><div class="label">失败</div><div class="value">{int(totals['failures'])}</div></div>
+    <div class="card"><div class="label">错误</div><div class="value">{int(totals['errors'])}</div></div>
+    <div class="card"><div class="label">用时</div><div class="value">{float(totals['time']):.2f}s</div></div>
   </section>
-  <section class="modules"><h2>Coverage by test module</h2>{module_rows}</section>
-  <footer><span>Python {escape(platform.python_version())} · {escape(platform.system())}</span><span>Generated from pytest JUnit XML · {generated}</span></footer>
+  <section class="modules"><h2>各测试模块用例数量</h2>{module_rows}</section>
+  <footer><span>Python {escape(platform.python_version())} · {escape(platform.system())}</span><span>基于 pytest JUnit XML 生成 · {generated}</span></footer>
 </main></body></html>"""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html, encoding="utf-8")

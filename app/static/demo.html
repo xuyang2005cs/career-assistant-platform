@@ -1,25 +1,25 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Career Assistant Platform job tracker and job-description extraction demo.">
-  <title>Career Assistant Platform · Demo</title>
+  <meta name="description" content="Career Assistant Platform 岗位管理与职位信息提取工作台。">
+  <title>Career Assistant Platform · 岗位工作台</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/static/demo.css">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to content</a>
+  <a class="skip-link" href="#main-content">跳转到主要内容</a>
   <header class="site-header">
-    <a class="brand" href="/demo" aria-label="Career Assistant Platform home">
+    <a class="brand" href="/demo" aria-label="Career Assistant Platform 首页">
       <span class="brand-mark" aria-hidden="true">CA</span>
       <span>
         <strong>Career Assistant Platform</strong>
-        <small>Job tracking, without the spreadsheet drift.</small>
+        <small>集中管理岗位信息与求职进度</small>
       </span>
     </a>
-    <nav aria-label="Project links">
-      <a href="/docs">API docs</a>
+    <nav aria-label="项目链接">
+      <a href="/docs">API 文档</a>
       <a href="https://github.com/xuyang2005cs/career-assistant-platform">GitHub</a>
     </nav>
   </header>
@@ -27,56 +27,56 @@
   <main id="main-content">
     <section class="intro" aria-labelledby="intro-title">
       <div>
-        <p class="eyebrow">Backend-first career workspace</p>
-        <h1 id="intro-title">Turn a job description into a trackable next step.</h1>
+        <p class="eyebrow">求职岗位管理工作台</p>
+        <h1 id="intro-title">从职位描述到可持续跟踪的求职进度</h1>
       </div>
-      <p class="intro-copy">Paste a synthetic JD, review the extracted fields, then save it through the same validated API used by the tracker.</p>
+      <p class="intro-copy">粘贴职位描述，核对提取结果，再通过统一的岗位 API 保存并持续管理。</p>
     </section>
 
-    <section class="metrics" aria-label="Job statistics">
-      <article><span>Total jobs</span><strong id="metric-total">—</strong></article>
-      <article><span>Saved</span><strong id="metric-saved">—</strong></article>
-      <article><span>Applied</span><strong id="metric-applied">—</strong></article>
-      <article><span>Interview</span><strong id="metric-interview">—</strong></article>
-      <article><span>Offer</span><strong id="metric-offer">—</strong></article>
+    <section class="metrics" aria-label="岗位统计">
+      <article><span>岗位总数</span><strong id="metric-total">—</strong></article>
+      <article><span>已收藏</span><strong id="metric-saved">—</strong></article>
+      <article><span>已投递</span><strong id="metric-applied">—</strong></article>
+      <article><span>面试中</span><strong id="metric-interview">—</strong></article>
+      <article><span>已录用</span><strong id="metric-offer">—</strong></article>
     </section>
 
     <div class="workspace-grid">
       <section class="panel tracker-panel" aria-labelledby="tracker-title">
         <div class="panel-heading">
           <div>
-            <p class="section-label">Live SQLite data</p>
-            <h2 id="tracker-title">Job tracker</h2>
+            <p class="section-label">SQLite 实时数据</p>
+            <h2 id="tracker-title">岗位管理</h2>
           </div>
-          <button class="button button-quiet" id="refresh-jobs" type="button">Refresh</button>
+          <button class="button button-quiet" id="refresh-jobs" type="button">刷新</button>
         </div>
 
         <div class="filters" role="search">
           <label>
-            <span>Status</span>
+            <span>岗位状态</span>
             <select id="status-filter">
-              <option value="">All statuses</option>
-              <option value="saved">Saved</option>
-              <option value="applied">Applied</option>
-              <option value="interview">Interview</option>
-              <option value="offer">Offer</option>
-              <option value="rejected">Rejected</option>
-              <option value="closed">Closed</option>
+              <option value="">全部状态</option>
+              <option value="saved">已收藏</option>
+              <option value="applied">已投递</option>
+              <option value="interview">面试中</option>
+              <option value="offer">已录用</option>
+              <option value="rejected">未通过</option>
+              <option value="closed">已结束</option>
             </select>
           </label>
           <label class="keyword-filter">
-            <span>Company or location</span>
-            <input id="keyword-filter" type="search" placeholder="Try Nova or Remote">
+            <span>公司或地点</span>
+            <input id="keyword-filter" type="search" placeholder="例如：Nova 或 Remote">
           </label>
         </div>
 
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Role</th><th>Company</th><th>Location</th><th>Status</th></tr>
+              <tr><th>职位</th><th>公司</th><th>地点</th><th>状态</th></tr>
             </thead>
             <tbody id="jobs-body">
-              <tr><td colspan="4" class="table-message">Loading jobs…</td></tr>
+              <tr><td colspan="4" class="table-message">正在加载岗位…</td></tr>
             </tbody>
           </table>
         </div>
@@ -86,52 +86,52 @@
       <section class="panel extraction-panel" aria-labelledby="extract-title">
         <div class="panel-heading">
           <div>
-            <p class="section-label">Preview before persistence</p>
-            <h2 id="extract-title">Extract a job</h2>
+            <p class="section-label">确认后再保存</p>
+            <h2 id="extract-title">职位信息提取</h2>
           </div>
-          <span class="offline-badge">Works offline</span>
+          <span class="offline-badge">支持本地规则解析</span>
         </div>
 
-        <ol class="workflow" aria-label="Extraction workflow">
-          <li class="active"><span>1</span>Paste</li>
-          <li><span>2</span>Extract</li>
-          <li><span>3</span>Review</li>
-          <li><span>4</span>Save</li>
+        <ol class="workflow" aria-label="职位信息提取流程">
+          <li class="active"><span>1</span>粘贴</li>
+          <li><span>2</span>提取</li>
+          <li><span>3</span>核对</li>
+          <li><span>4</span>保存</li>
         </ol>
 
-        <label class="textarea-label" for="jd-text">Job description</label>
-        <textarea id="jd-text" rows="10" placeholder="Company: Example Tech&#10;Role: Python Backend Intern&#10;Location: Beijing&#10;&#10;Requirements: Python, FastAPI, SQL, Git, Linux"></textarea>
+        <label class="textarea-label" for="jd-text">职位描述</label>
+        <textarea id="jd-text" rows="10" placeholder="Company: Example Tech&#10;Role: Python 后端开发实习生&#10;Location: 北京&#10;&#10;Requirements: Python, FastAPI, SQL, Git, Linux"></textarea>
         <div class="action-row">
-          <button class="button button-quiet" id="use-sample" type="button">Use sample JD</button>
-          <button class="button button-primary" id="extract-job" type="button">Extract job</button>
+          <button class="button button-quiet" id="use-sample" type="button">使用示例 JD</button>
+          <button class="button button-primary" id="extract-job" type="button">提取岗位信息</button>
         </div>
 
         <section class="preview" id="preview" aria-labelledby="preview-title" hidden>
           <div class="preview-heading">
             <div>
-              <p class="section-label">Editable preview</p>
-              <h3 id="preview-title">Confirm the extracted fields</h3>
+              <p class="section-label">可编辑提取结果</p>
+              <h3 id="preview-title">核对岗位信息</h3>
             </div>
             <span class="method-badge" id="extraction-method">—</span>
           </div>
           <div class="preview-grid">
-            <label><span>Title</span><input id="preview-title-input" type="text" maxlength="200"></label>
-            <label><span>Company</span><input id="preview-company" type="text" maxlength="200"></label>
-            <label class="full"><span>Location</span><input id="preview-location" type="text" maxlength="200"></label>
+            <label><span>职位名称</span><input id="preview-title-input" type="text" maxlength="200"></label>
+            <label><span>公司</span><input id="preview-company" type="text" maxlength="200"></label>
+            <label class="full"><span>工作地点</span><input id="preview-location" type="text" maxlength="200"></label>
           </div>
           <div class="skill-block">
-            <span>Detected skills</span>
+            <span>技能关键词</span>
             <div class="skill-list" id="skill-list"></div>
           </div>
           <p class="fallback-note" id="fallback-note" hidden></p>
-          <button class="button button-save" id="save-job" type="button">Save to job tracker</button>
+          <button class="button button-save" id="save-job" type="button">保存岗位</button>
         </section>
       </section>
     </div>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-  <footer>FastAPI · SQLAlchemy 2 · SQLite · automated pytest coverage</footer>
+  <footer>FastAPI · SQLAlchemy 2 · SQLite · pytest 自动化测试</footer>
   <script src="/static/demo.js" defer></script>
 </body>
 </html>

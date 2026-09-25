@@ -14,7 +14,7 @@
   --rose: #ffe3e3;
   --rose-ink: #963838;
   --shadow: 0 18px 50px rgba(23, 42, 73, .09);
-  font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI Variable", "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -71,7 +71,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: 10px 10px 10px 2px;
   font: 700 15px/1 "Cascadia Mono", Consolas, monospace;
 }
-.brand strong { display: block; font: 700 16px/1.25 Bahnschrift, "Segoe UI", sans-serif; }
+.brand strong { display: block; font: 700 16px/1.25 Bahnschrift, "Microsoft YaHei UI", "Segoe UI", sans-serif; }
 .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
 
 nav { display: flex; gap: 22px; }
@@ -94,8 +94,8 @@ main { width: min(1440px, calc(100% - 48px)); margin: 0 auto; padding: 58px 0 70
   letter-spacing: .11em;
   text-transform: uppercase;
 }
-h1, h2, h3 { font-family: Bahnschrift, "Segoe UI", sans-serif; letter-spacing: -.025em; }
-h1 { max-width: 780px; margin: 0; font-size: clamp(42px, 5vw, 70px); line-height: .98; }
+h1, h2, h3 { font-family: Bahnschrift, "Microsoft YaHei UI", "Segoe UI", sans-serif; letter-spacing: -.025em; }
+h1 { max-width: 860px; margin: 0; font-size: clamp(42px, 5vw, 68px); line-height: 1.08; }
 .intro-copy { margin: 0 0 5px; color: var(--muted); font-size: 17px; line-height: 1.65; }
 
 .metrics {
@@ -110,7 +110,7 @@ h1 { max-width: 780px; margin: 0; font-size: clamp(42px, 5vw, 70px); line-height
 }
 .metrics article { padding: 18px 22px; border-right: 1px solid var(--line); }
 .metrics article:last-child { border-right: 0; }
-.metrics span { display: block; color: var(--muted); font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; }
+.metrics span { display: block; color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .04em; }
 .metrics strong { display: block; margin-top: 5px; font: 700 29px/1 Bahnschrift, sans-serif; }
 
 .workspace-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(420px, .88fr); gap: 24px; align-items: start; }
@@ -153,7 +153,7 @@ textarea { padding: 13px; resize: vertical; line-height: 1.55; font: 13px/1.55 "
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 13px 10px; border-bottom: 1px solid #e9edf3; text-align: left; }
-th { color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+th { color: var(--muted); font-size: 11px; letter-spacing: .08em; }
 td { font-size: 14px; }
 td:first-child { font-weight: 700; }
 .table-message { padding: 36px 10px; color: var(--muted); text-align: center; font-weight: 400 !important; }
@@ -163,7 +163,7 @@ td:first-child { font-weight: 700; }
   border-radius: 999px;
   font: 700 11px/1 "Cascadia Mono", Consolas, monospace;
 }
-.status-pill { padding: 6px 9px; background: #e9efff; color: #3152ad; text-transform: capitalize; }
+.status-pill { padding: 6px 9px; background: #e9efff; color: #3152ad; }
 .status-interview, .status-offer { background: var(--mint); color: var(--mint-ink); }
 .status-rejected, .status-closed { background: var(--rose); color: var(--rose-ink); }
 .status-applied { background: var(--amber); color: var(--amber-ink); }

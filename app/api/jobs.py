@@ -13,11 +13,11 @@ from app.services import job_service
 
 router = APIRouter(
     prefix="/api/v1/jobs",
-    tags=["jobs"],
+    tags=["岗位管理"],
     responses={
         status.HTTP_422_UNPROCESSABLE_CONTENT: {
             "model": ErrorResponse,
-            "description": "Request validation failed",
+            "description": "请求参数校验失败",
         }
     },
 )
@@ -25,14 +25,25 @@ DatabaseSession = Annotated[Session, Depends(get_db)]
 JobId = Annotated[int, Path(gt=0)]
 
 
-@router.post("", response_model=JobRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=JobRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="创建岗位",
+    description="创建一条岗位记录并返回完整岗位信息。",
+)
 def create_job(job_data: JobCreate, db: DatabaseSession) -> JobRead:
     """Create a job opportunity."""
 
     return JobRead.model_validate(job_service.create_job(db, job_data))
 
 
-@router.get("", response_model=JobList)
+@router.get(
+    "",
+    response_model=JobList,
+    summary="查询岗位列表",
+    description="分页查询岗位，并支持按公司、状态和地点筛选。",
+)
 def list_jobs(
     db: DatabaseSession,
     page: Annotated[int, Query(ge=1)] = 1,
@@ -59,10 +70,12 @@ def list_jobs(
 @router.get(
     "/{job_id}",
     response_model=JobRead,
+    summary="查询岗位详情",
+    description="根据岗位 ID 查询一条岗位记录。",
     responses={
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorResponse,
-            "description": "Job not found",
+            "description": "岗位不存在",
         }
     },
 )
@@ -75,10 +88,12 @@ def get_job(job_id: JobId, db: DatabaseSession) -> JobRead:
 @router.patch(
     "/{job_id}",
     response_model=JobRead,
+    summary="更新岗位",
+    description="更新指定岗位中已提交的字段。",
     responses={
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorResponse,
-            "description": "Job not found",
+            "description": "岗位不存在",
         }
     },
 )
@@ -91,10 +106,12 @@ def update_job(job_id: JobId, job_data: JobUpdate, db: DatabaseSession) -> JobRe
 @router.delete(
     "/{job_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="删除岗位",
+    description="根据岗位 ID 删除一条岗位记录。",
     responses={
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorResponse,
-            "description": "Job not found",
+            "description": "岗位不存在",
         }
     },
 )

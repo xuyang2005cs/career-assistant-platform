@@ -10,7 +10,7 @@ async def test_demo_page_loads(client: AsyncClient) -> None:
 
     assert response.status_code == 200
     assert "Career Assistant Platform" in response.text
-    assert "Extract a job" in response.text
+    assert "职位信息提取" in response.text
     assert "/static/demo.css" in response.text
 
 

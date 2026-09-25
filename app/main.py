@@ -30,7 +30,7 @@ static_directory = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(
     title=settings.app_name,
-    description="Backend services for a career application workflow.",
+    description="面向求职岗位管理与职位信息提取的后端服务。",
     version="0.2.0",
     lifespan=lifespan,
 )

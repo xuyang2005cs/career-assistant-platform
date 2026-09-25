@@ -10,11 +10,11 @@ from app.services.extraction import ExtractionService, get_extraction_service
 
 router = APIRouter(
     prefix="/api/v1",
-    tags=["extraction"],
+    tags=["职位信息提取"],
     responses={
         status.HTTP_422_UNPROCESSABLE_CONTENT: {
             "model": ErrorResponse,
-            "description": "Request validation failed",
+            "description": "请求参数校验失败",
         }
     },
 )
@@ -24,7 +24,12 @@ ExtractionServiceDependency = Annotated[
 ]
 
 
-@router.post("/job-extract", response_model=JobExtractionPreview)
+@router.post(
+    "/job-extract",
+    response_model=JobExtractionPreview,
+    summary="提取职位信息",
+    description="从职位描述文本中提取结构化岗位信息，仅返回预览，不写入数据库。",
+)
 async def extract_job(
     request: JobExtractRequest,
     service: ExtractionServiceDependency,

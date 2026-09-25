@@ -1,6 +1,6 @@
 const sampleJobDescription = `Company: Example Tech
-Role: Python Backend Intern
-Location: Beijing
+Role: Python 后端开发实习生
+Location: 北京
 
 Requirements:
 Python, FastAPI, SQL, Git, Linux`;
@@ -29,7 +29,7 @@ async function api(path, options = {}) {
   });
   const payload = response.status === 204 ? null : await response.json();
   if (!response.ok) {
-    const message = payload?.error?.message || `Request failed with status ${response.status}`;
+    const message = payload?.error?.message || `请求失败，HTTP 状态码：${response.status}`;
     throw new Error(message);
   }
   return payload;
@@ -65,7 +65,7 @@ function renderJobs() {
   });
 
   if (!visibleJobs.length) {
-    elements.jobsBody.innerHTML = '<tr><td colspan="4" class="table-message">No jobs match these filters.</td></tr>';
+    elements.jobsBody.innerHTML = '<tr><td colspan="4" class="table-message">没有符合当前筛选条件的岗位。</td></tr>';
   } else {
     elements.jobsBody.replaceChildren(...visibleJobs.map((job) => {
       const row = document.createElement("tr");
@@ -77,13 +77,13 @@ function renderJobs() {
       const statusCell = document.createElement("td");
       const pill = document.createElement("span");
       pill.className = `status-pill status-${job.status}`;
-      pill.textContent = job.status;
+      pill.textContent = statusLabel(job.status);
       statusCell.append(pill);
       row.append(statusCell);
       return row;
     }));
   }
-  elements.resultCount.textContent = `Showing ${visibleJobs.length} of ${state.jobs.length} jobs`;
+  elements.resultCount.textContent = `当前显示 ${visibleJobs.length} 个，共 ${state.jobs.length} 个岗位`;
 }
 
 async function loadJobs() {
@@ -93,18 +93,29 @@ async function loadJobs() {
     updateMetrics(state.jobs);
     renderJobs();
   } catch (error) {
-    elements.jobsBody.innerHTML = '<tr><td colspan="4" class="table-message">Jobs could not be loaded.</td></tr>';
+    elements.jobsBody.innerHTML = '<tr><td colspan="4" class="table-message">岗位数据加载失败，请稍后重试。</td></tr>';
     showToast(error.message, true);
   }
 }
 
 function methodLabel(method) {
   return {
-    rule_based: "Rule-based · offline",
-    rule_based_fallback: "Rule-based fallback",
+    rule_based: "规则解析",
+    rule_based_fallback: "规则解析（自动切换）",
     deepseek: "DeepSeek",
-    mock: "Mock · development",
+    mock: "测试 Provider",
   }[method] || method;
+}
+
+function statusLabel(status) {
+  return {
+    saved: "已收藏",
+    applied: "已投递",
+    interview: "面试中",
+    offer: "已录用",
+    rejected: "未通过",
+    closed: "已结束",
+  }[status] || status;
 }
 
 function renderExtraction(result) {
@@ -113,14 +124,14 @@ function renderExtraction(result) {
   elements.previewCompany.value = result.company || "";
   elements.previewLocation.value = result.location || "";
   elements.extractionMethod.textContent = methodLabel(result.extraction_method);
-  elements.skillList.replaceChildren(...(result.skills.length ? result.skills : ["No skills detected"]).map((skill) => {
+  elements.skillList.replaceChildren(...(result.skills.length ? result.skills : ["未识别到技能关键词"]).map((skill) => {
     const chip = document.createElement("span");
     chip.className = "skill-chip";
     chip.textContent = skill;
     return chip;
   }));
   if (result.fallback_reason) {
-    elements.fallbackNote.textContent = `Primary provider was unavailable (${result.fallback_reason}); the offline extractor completed this preview.`;
+    elements.fallbackNote.textContent = `外部 Provider 当前不可用（${result.fallback_reason}），已切换为规则解析。`;
     elements.fallbackNote.hidden = false;
   } else {
     elements.fallbackNote.hidden = true;
@@ -132,13 +143,13 @@ function renderExtraction(result) {
 async function extractJob() {
   const text = elements.jdText.value.trim();
   if (!text) {
-    showToast("Paste a job description before extracting.", true);
+    showToast("请先粘贴职位描述。", true);
     elements.jdText.focus();
     return;
   }
   const button = document.querySelector("#extract-job");
   button.disabled = true;
-  button.textContent = "Extracting…";
+  button.textContent = "正在提取…";
   try {
     state.sourceText = text;
     const result = await api("/api/v1/job-extract", {
@@ -150,7 +161,7 @@ async function extractJob() {
     showToast(error.message, true);
   } finally {
     button.disabled = false;
-    button.textContent = "Extract job";
+    button.textContent = "提取岗位信息";
   }
 }
 
@@ -158,12 +169,12 @@ async function saveJob() {
   const title = elements.previewTitle.value.trim();
   const company = elements.previewCompany.value.trim();
   if (!title || !company) {
-    showToast("Title and company are required before saving.", true);
+    showToast("保存前请填写职位名称和公司。", true);
     return;
   }
   const button = document.querySelector("#save-job");
   button.disabled = true;
-  button.textContent = "Saving…";
+  button.textContent = "正在保存…";
   try {
     const job = await api("/api/v1/jobs", {
       method: "POST",
@@ -176,13 +187,13 @@ async function saveJob() {
         status: "saved",
       }),
     });
-    showToast(`${job.title} saved to the tracker.`);
+    showToast(`已保存岗位：${job.title}`);
     await loadJobs();
   } catch (error) {
     showToast(error.message, true);
   } finally {
     button.disabled = false;
-    button.textContent = "Save to job tracker";
+    button.textContent = "保存岗位";
   }
 }
 
