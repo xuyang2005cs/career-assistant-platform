@@ -1,29 +1,29 @@
-# Current Architecture
+# 当前系统架构
 
-## Scope
+## 系统范围
 
-Phase 2 implements one persisted domain entity, `Job`, plus a preview-only job-description extraction boundary. There are no user, resume, application, interview, vector, agent, or authentication tables.
+当前系统以 `Job` 为核心持久化实体，并提供职位描述信息提取能力。岗位管理和信息提取通过独立 Router 与 Service 组织；浏览器工作台与 Swagger 均复用公开 API。
 
 ```mermaid
 flowchart TB
-    Client[Browser / API Client]
-    Demo[Lightweight Demo]
+    Client[浏览器 / API Client]
+    Workbench[岗位工作台]
     Swagger[Swagger UI]
-    App[FastAPI Application]
-    Jobs[Job Router]
-    Extract[Extraction Router]
-    JobService[Job Service]
-    ExtractService[Extraction Service]
-    Rule[Rule-based Provider]
-    DeepSeek[DeepSeek Provider - Optional]
-    Mock[Mock Provider - Test/Dev]
+    App[FastAPI 应用]
+    Jobs[岗位管理 Router]
+    Extract[信息提取 Router]
+    JobService[岗位 Service]
+    ExtractService[提取 Service]
+    Rule[规则解析 Provider]
+    DeepSeek[DeepSeek Provider]
+    TestProvider[测试 Provider]
     ORM[SQLAlchemy 2 ORM]
-    DevDB[(Development SQLite)]
+    DevDB[(本地 SQLite)]
 
-    Client --> Demo
+    Client --> Workbench
     Client --> Swagger
-    Demo --> Jobs
-    Demo --> Extract
+    Workbench --> Jobs
+    Workbench --> Extract
     Swagger --> App
     Jobs --> App
     Extract --> App
@@ -31,42 +31,42 @@ flowchart TB
     App --> ExtractService
     JobService --> ORM --> DevDB
     ExtractService --> Rule
-    ExtractService -. configured only .-> DeepSeek
-    ExtractService -. tests/development only .-> Mock
-    ExtractService --> Preview[Editable Extraction Preview]
-    Preview -->|explicit save| Jobs
+    ExtractService -. 环境变量配置 .-> DeepSeek
+    ExtractService -. 测试环境 .-> TestProvider
+    ExtractService --> Preview[可编辑提取结果]
+    Preview -->|用户确认| Jobs
 
     Tests[pytest + HTTPX ASGITransport] --> App
-    Tests --> TestDB[(Fresh SQLite database per test)]
+    Tests --> TestDB[(每项测试独立 SQLite)]
 ```
 
-## Request Flows
+## 请求流程
 
-### Job persistence
+### 岗位数据持久化
 
-1. FastAPI validates path, query, and body data against Pydantic contracts.
-2. The Job router passes a request-scoped SQLAlchemy session to the service layer.
-3. The service performs CRUD, filtering, ordering, and pagination with SQLAlchemy 2.x statements.
-4. ORM entities are converted to explicit response schemas.
-5. Domain not-found exceptions and validation failures use one error envelope.
+1. FastAPI 使用 Pydantic Schema 校验路径、查询参数和请求体。
+2. 岗位 Router 将请求级 SQLAlchemy Session 传递给 Service 层。
+3. Service 使用 SQLAlchemy 2.x Statement 完成 CRUD、筛选、排序和分页。
+4. ORM 实体通过独立的响应 Schema 输出。
+5. 资源不存在与请求校验错误统一使用 `ErrorResponse`。
 
-### Job-description extraction
+### 职位信息提取
 
-1. `POST /api/v1/job-extract` validates a non-blank input of at most 20,000 characters.
-2. `ExtractionService` chooses the configured provider. With the safe default and no API key, it uses deterministic rule-based extraction.
-3. DeepSeek failures are classified and may fall back to rules. The response then says `rule_based_fallback`; it never claims model success.
-4. The result is a preview and does not touch the database. A user must explicitly save through `POST /api/v1/jobs`.
+1. `POST /api/v1/job-extract` 校验非空且不超过 20,000 字符的职位描述。
+2. `ExtractionService` 根据环境配置选择 Provider；默认配置使用规则解析。
+3. DeepSeek Provider 对鉴权、限流、服务端错误、网络异常和响应格式异常进行分类处理，并可切换到规则解析。
+4. 接口只返回提取预览，不写入数据库；用户确认后再调用 `POST /api/v1/jobs` 保存。
 
-## Design Boundaries
+## 模块边界
 
-- `app/main.py` composes routers, static assets, error handling, and database startup.
-- `app/api/` owns HTTP semantics; `/demo` consumes the same public API rather than bypassing it.
-- `app/services/job_service.py` owns Job persistence without extra repository/DAO layers.
-- `app/services/extraction/` contains the rule-based, optional DeepSeek, and test/development mock providers.
-- `app/models/job.py` is the only SQLAlchemy entity.
-- `app/schemas/` keeps API contracts separate from ORM models.
-- `tests/conftest.py` replaces the runtime database dependency with a new temporary SQLite database for every test.
+- `app/main.py`：组合 Router、静态资源、异常处理和数据库启动流程。
+- `app/api/`：负责 HTTP 语义、参数约束和响应状态码。
+- `app/services/job_service.py`：负责岗位 CRUD、筛选和分页。
+- `app/services/extraction/`：负责 Provider 实现与提取流程编排。
+- `app/models/job.py`：定义当前唯一的 SQLAlchemy 实体。
+- `app/schemas/`：定义独立于 ORM 的 API 数据契约。
+- `tests/conftest.py`：为每项测试创建 SQLite 数据库并覆盖 `get_db` 依赖。
 
-## Database Portability Boundary
+## 数据库扩展边界
 
-The engine is created from `DATABASE_URL`. SQLite receives only its required `check_same_thread=False` option; other SQLAlchemy URLs do not. MySQL still requires a selected driver, a running database, and real verification before it can be claimed as supported.
+数据库引擎从 `DATABASE_URL` 创建。SQLite 连接会按需加入 `check_same_thread=False`，其他 SQLAlchemy URL 不使用 SQLite 专属参数。当前本地运行采用 SQLite；需要扩展至 MySQL 时，可在保留 ORM 与 Service 结构的基础上补充驱动、连接配置和迁移流程。

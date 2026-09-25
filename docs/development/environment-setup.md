@@ -1,14 +1,14 @@
-# Environment Setup
+# 开发环境配置
 
-## Verified Baseline
+## 基础环境
 
-- Windows development environment
+- Windows 开发环境
 - Python 3.13.14
 - Git 2.53.0
 - GitHub CLI 2.95.0
-- Repository-local Git identity
+- 仓库级 Git 身份配置
 
-## Setup
+## 安装与运行
 
 ```powershell
 python -m venv .venv
@@ -18,11 +18,11 @@ python -m pytest -v
 python -m uvicorn app.main:app --reload
 ```
 
-The `.venv` directory and local `.env` files are ignored by Git. Copy `.env.example` to `.env` only when local configuration is required; never commit the resulting file.
+`.venv` 目录和本地 `.env` 文件已被 Git 忽略。仅在需要本地配置时复制 `.env.example`，生成的 `.env` 不应提交。
 
-## Package Index Note
+## Python 包索引记录
 
-During Phase 1, the machine's configured Tsinghua PyPI mirror returned no FastAPI distributions. Installation succeeded without changing global configuration by using the official index for that command:
+项目初始化时，系统配置的清华 PyPI 镜像未返回 FastAPI 版本。保持全局配置不变，单次安装命令切换至官方索引后成功完成依赖安装：
 
 ```powershell
 python -m pip install --index-url https://pypi.org/simple -r requirements.txt

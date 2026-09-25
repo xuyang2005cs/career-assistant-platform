@@ -1,25 +1,25 @@
-# Phase 1: Foundation
+# 项目基础能力开发记录
 
-Date: 2026-09-24
+日期：2026-09-24
 
-## Delivered
+## 完成内容
 
-- Initialized the repository on the `main` branch.
-- Added a minimal FastAPI package structure.
-- Added `GET /health` with a typed response contract.
-- Added an API-level pytest test.
-- Verified Uvicorn startup and a real HTTP response.
-- Added security defaults, architecture notes, and recruiter-facing project documentation.
+- 在 `main` 分支初始化仓库。
+- 建立 FastAPI 基础包结构。
+- 实现带类型响应契约的 `GET /health`。
+- 增加 API 层 pytest 测试。
+- 验证 Uvicorn 启动和真实 HTTP 响应。
+- 配置安全默认项、架构说明和项目文档。
 
-## Verification
+## 验证结果
 
-- Uvicorn startup: passed
-- `GET /health`: HTTP 200 with `{"status":"ok"}`
-- pytest: 1 passed
+- Uvicorn 启动：通过
+- `GET /health`：HTTP `200`，返回 `{"status":"ok"}`
+- pytest：1 项测试通过
 
-## Explicitly Deferred
+## 后续建设方向
 
 - Job CRUD
-- SQLAlchemy and MySQL
-- AI analysis, RAG, agents, MCP, and vector databases
-- Deployment configuration
+- SQLAlchemy 数据持久化
+- 职位信息提取
+- 部署与运行配置

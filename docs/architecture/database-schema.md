@@ -1,53 +1,53 @@
-# Database Schema
+# 数据库结构
 
-## Implemented Entity
+## 当前实体
 
-Phase 2 implements only the `jobs` table.
+系统当前实现 `jobs` 表，用于保存岗位基本信息和求职状态。
 
 ```mermaid
 erDiagram
     JOB {
-        integer id PK
-        varchar_200 title "not null, indexed"
-        varchar_200 company "not null, indexed"
-        varchar_200 location "nullable, indexed"
-        text description "nullable"
-        varchar_2048 source_url "nullable"
-        varchar_9 status "not null, indexed, checked"
-        datetime created_at "not null"
-        datetime updated_at "not null"
+        integer id PK "主键"
+        varchar_200 title "必填，索引"
+        varchar_200 company "必填，索引"
+        varchar_200 location "可选，索引"
+        text description "可选"
+        varchar_2048 source_url "可选"
+        varchar_9 status "必填，索引，检查约束"
+        datetime created_at "创建时间"
+        datetime updated_at "更新时间"
     }
 ```
 
-## Fields
+## 字段说明
 
-| Field | SQLAlchemy / SQLite type | Nullable | Constraints and purpose |
+| 字段 | SQLAlchemy / SQLite 类型 | 可为空 | 约束与用途 |
 |---|---|---:|---|
-| `id` | `Integer` / `INTEGER` | No | Primary key |
-| `title` | `String(200)` / `VARCHAR(200)` | No | Trimmed, non-blank, indexed |
-| `company` | `String(200)` / `VARCHAR(200)` | No | Trimmed, non-blank, indexed |
-| `location` | `String(200)` / `VARCHAR(200)` | Yes | Optional exact filter, indexed |
-| `description` | `Text` / `TEXT` | Yes | Optional detail, API maximum 20,000 characters |
-| `source_url` | `String(2048)` / `VARCHAR(2048)` | Yes | Optional URL validated by Pydantic |
-| `status` | non-native `Enum` / `VARCHAR(9)` | No | Indexed and protected by `job_status` check constraint |
-| `created_at` | `DateTime(timezone=True)` / `DATETIME` | No | UTC creation time |
-| `updated_at` | `DateTime(timezone=True)` / `DATETIME` | No | Updated automatically when a row changes |
+| `id` | `Integer` / `INTEGER` | 否 | 主键 |
+| `title` | `String(200)` / `VARCHAR(200)` | 否 | 去除首尾空格后不能为空，建立索引 |
+| `company` | `String(200)` / `VARCHAR(200)` | 否 | 去除首尾空格后不能为空，建立索引 |
+| `location` | `String(200)` / `VARCHAR(200)` | 是 | 支持地点筛选，建立索引 |
+| `description` | `Text` / `TEXT` | 是 | 职位描述，API 最大长度 20,000 字符 |
+| `source_url` | `String(2048)` / `VARCHAR(2048)` | 是 | 经过 Pydantic URL 校验的来源链接 |
+| `status` | 非原生 `Enum` / `VARCHAR(9)` | 否 | 建立索引，并受 `job_status` 检查约束保护 |
+| `created_at` | `DateTime(timezone=True)` / `DATETIME` | 否 | UTC 创建时间 |
+| `updated_at` | `DateTime(timezone=True)` / `DATETIME` | 否 | 数据变化时自动更新 |
 
-## Status Values
+## 状态枚举
 
-- `saved`: interesting role retained for review
-- `applied`: an application was submitted
-- `interview`: the process reached an interview stage
-- `offer`: an offer was received
-- `rejected`: the employer or process rejected the application
-- `closed`: the opportunity ended without being represented accurately as a rejection
+- `saved`：已收藏，等待进一步评估
+- `applied`：已提交申请
+- `interview`：已进入面试流程
+- `offer`：已获得录用意向
+- `rejected`：本次申请未通过
+- `closed`：岗位过期、主动结束或其他终止情况
 
-`closed` is kept because expired listings and withdrawn applications are common and semantically different from `rejected`.
+`closed` 用于表达岗位过期或主动结束等情况，与 `rejected` 保持业务语义区分。
 
-## Initialization Strategy
+## 初始化策略
 
-`Base.metadata.create_all()` is sufficient for the current single-table MVP and avoids introducing an unused migration workflow. Alembic becomes appropriate when an existing schema must evolve across environments.
+当前只有一个数据表，使用 `Base.metadata.create_all()` 完成结构初始化，保持本地启动流程简洁。当持久化环境需要连续的 Schema 版本演进时，将引入 Alembic 管理迁移。
 
-## Verified Database DDL
+## SQLite DDL 核验
 
-The Phase 2 SQLite database created a primary key, the named `job_status` check constraint, and indexes on `title`, `company`, `location`, and `status`. The evidence image at [`docs/images/database-er-diagram.png`](../images/database-er-diagram.png) was produced from this verified schema.
+本地 SQLite 数据库已生成主键、`job_status` 检查约束，以及 `title`、`company`、`location`、`status` 索引。结构截图见 [`database-er-diagram.png`](../images/database-er-diagram.png)。

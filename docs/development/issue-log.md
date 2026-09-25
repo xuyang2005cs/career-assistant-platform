@@ -1,53 +1,53 @@
-# Issue Log
+# 问题排查记录
 
-## 2026-09-24: Configured package mirror returned no FastAPI release
+## 2026-09-24：Python 包镜像未返回 FastAPI 版本
 
-**Observed:** Installing `requirements.txt` through the machine's configured Tsinghua PyPI mirror failed with “No matching distribution found.”
+**现象：** 通过系统配置的清华 PyPI 镜像安装 `requirements.txt` 时出现 “No matching distribution found”。
 
-**Diagnosis:** The mirror returned no available FastAPI versions; the requirement itself was valid.
+**原因：** 镜像未返回可用的 FastAPI 版本，项目依赖范围本身有效。
 
-**Resolution:** Retried the repository-local virtual environment installation with the official PyPI index for that command. Global pip configuration was left unchanged.
+**处理：** 保持全局 pip 配置不变，仅在本次安装命令中指定官方 PyPI 索引，依赖安装成功。
 
-## 2026-09-24: Test client emitted an upstream deprecation warning
+## 2026-09-24：TestClient 触发上游弃用警告
 
-**Observed:** The first passing test used FastAPI's `TestClient`, and the installed Starlette release warned that its HTTPX compatibility path was deprecated.
+**现象：** 首个通过的接口测试使用 FastAPI `TestClient`，Starlette 对其 HTTPX 兼容路径发出弃用警告。
 
-**Resolution:** Replaced `TestClient` with HTTPX `ASGITransport` and `AsyncClient`, then reran the suite successfully with no warnings.
+**处理：** 改用 HTTPX `ASGITransport` 和 `AsyncClient`，重新运行测试后警告消失。
 
-## 2026-09-24: Custom validation body did not match generated OpenAPI
+## 2026-09-24：自定义校验响应与 OpenAPI 不一致
 
-**Observed:** FastAPI initially generated its default `HTTPValidationError` component even though runtime validation failures used the project's custom error envelope.
+**现象：** 运行时校验错误已使用项目统一错误结构，但 OpenAPI 仍展示默认 `HTTPValidationError`。
 
-**Cause:** Replacing the exception handler changes runtime behavior but does not automatically replace each route's documented `422` response model.
+**原因：** 替换异常处理器不会自动替换每个路由文档中的 `422` 响应模型。
 
-**Resolution:** Added explicit `ErrorDetail` and `ErrorResponse` schemas and configured the Job router's `422` response. OpenAPI was regenerated and verified to reference `ErrorResponse`.
+**处理：** 增加 `ErrorDetail` 和 `ErrorResponse`，并为 Job Router 显式配置 `422` 响应；重新生成 OpenAPI 后引用正确。
 
-## 2026-09-24: SQLite schema inspection command failed due to nested quoting
+## 2026-09-24：SQLite DDL 检查命令出现引号嵌套错误
 
-**Observed:** The first one-line Python command used to read SQLite DDL failed with a syntax error before opening or modifying the database.
+**现象：** 首次执行 SQLite DDL 读取命令时，Python 在打开数据库前即报告语法错误。
 
-**Cause:** PowerShell and Python string quoting were nested incorrectly.
+**原因：** PowerShell 与 Python 字符串引号嵌套不正确。
 
-**Resolution:** Reissued a simpler read-only command with PowerShell single-quoted command text and Python double-quoted SQL. The real table and index DDL were then captured successfully.
+**处理：** 使用 PowerShell 单引号包裹命令，并在 Python SQL 中使用双引号，成功读取表和索引 DDL。
 
-## 2026-09-24: Browser automation blocked a local `file:` diagram URL
+## 2026-09-24：浏览器自动化禁止访问本地 `file:` 地址
 
-**Observed:** Playwright refused to navigate directly to the local ER diagram HTML file.
+**现象：** Playwright 无法直接打开本地 ER 图 HTML 文件。
 
-**Cause:** The browser automation safety policy blocks the `file:` protocol.
+**原因：** 浏览器自动化安全策略禁止 `file:` 协议导航。
 
-**Resolution:** Served the static diagram temporarily on `127.0.0.1:8765`, captured the verified page, and stopped the temporary server. No schema data was uploaded externally.
+**处理：** 在 `127.0.0.1` 启动本地静态服务完成页面核对与截图，文件未上传到外部服务。
 
-## 2026-09-24: Demo acceptance produced a browser console error
+## 2026-09-24：工作台出现 favicon 404
 
-**Observed:** The demo rendered and functioned, but the browser console reported a `404` for `/favicon.ico`.
+**现象：** 页面功能正常，但浏览器控制台记录 `/favicon.ico` 的 `404`。
 
-**Cause:** Browsers request a favicon automatically even when a page does not declare one.
+**原因：** 浏览器会自动请求 favicon。
 
-**Resolution:** Added a safe inline `data:` favicon to the demo and the reproducible test-evidence page, reran browser acceptance, and confirmed zero console errors and warnings.
+**处理：** 为工作台和测试结果页面加入内联 `data:` favicon，重新验收后控制台无错误和警告。
 
-## 2026-09-24: Test screenshot risked becoming manually curated evidence
+## 2026-09-24：测试结果截图缺少稳定的复现方式
 
-**Observed:** A terminal screenshot would be difficult to reproduce at a stable size and could be mistaken for manually composed output.
+**现象：** 直接截取终端输出难以保持统一尺寸和清晰排版。
 
-**Resolution:** Ran pytest with JUnit XML output, added a small renderer that reads the real counts and duration, and captured that generated page in a real browser. The source XML remains a local ignored build artifact; the screenshot reports the verified 40-test run.
+**处理：** pytest 生成 JUnit XML，项目脚本读取真实测试数量、失败数和运行时间，再由浏览器截图。XML 保存在 Git 忽略的构建输出目录中。

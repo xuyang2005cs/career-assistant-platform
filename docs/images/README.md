@@ -1,12 +1,12 @@
-# Project Images
+# 项目截图
 
-This directory contains evidence captured from implemented and running features. Images must not imply functionality that does not exist.
+本目录保存由当前运行版本生成的项目截图，所有页面和响应均来自本地 FastAPI 应用。
 
-## Current Evidence
+## 当前截图
 
-- `swagger-job-api.png`: live FastAPI Swagger UI showing Health, all five Job CRUD operations, extraction, and generated schemas
-- `job-api-example.png`: live Swagger execution of a synthetic Job creation request with HTTP 201 response
-- `database-er-diagram.png`: one-entity schema diagram based on the actual Phase 2 SQLite `jobs` DDL
-- `demo-dashboard.png`: real `/demo` page backed by the seeded development SQLite database
-- `job-extraction-demo.png`: real rule-based extraction preview, explicitly labeled as offline
-- `pytest-result.png`: browser capture generated from the real pytest JUnit XML report
+- `career-dashboard.png`：岗位工作台，展示统计、筛选、岗位列表和职位信息提取入口
+- `job-extraction.png`：规则解析生成的可编辑职位信息预览
+- `swagger-job-api.png`：Swagger UI，展示运行状态、岗位 CRUD 和信息提取接口
+- `job-api-example.png`：Swagger 创建岗位请求和 HTTP `201` 响应
+- `database-er-diagram.png`：依据当前 SQLite `jobs` DDL 绘制的数据库结构图
+- `pytest-result.png`：由 pytest JUnit XML 结果生成的 40 项测试通过截图
